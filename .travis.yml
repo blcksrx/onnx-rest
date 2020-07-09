@@ -19,4 +19,14 @@ language: python
 python:
   - "3.8"
 install: pip install tox
-script: tox
+
+jobs:
+  include:
+    -  stage: static-check
+       script: tox -e flake8
+       name: flake8
+    -  script: tox -e isort
+       name: isort
+    - stage: python tests
+      script: tox -e pytest
+      name: pytest
