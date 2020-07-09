@@ -17,6 +17,7 @@
 # under the License.
 
 import json
+import os
 
 import numpy as np
 from fastapi import APIRouter, Request
@@ -38,6 +39,14 @@ async def model_list() -> Response:
 
 @model_api.get("/{model_name}/metadata")
 async def model_metadata(model_name: str) -> Response:
+    if model_name not in os.listdir("models"):
+        return Response(
+            content=json.dumps({
+                "message": "this model does not exists in the server"
+            }),
+            status_code=404,
+            headers={"content-type": "application/json"}
+        )
     return Response(
         content=json.dumps(
             {
@@ -52,8 +61,15 @@ async def model_metadata(model_name: str) -> Response:
 
 @model_api.post("/{model_name}/predict")
 async def predict(model_name: str, request: Request) -> Response:
+    if model_name not in os.listdir("models"):
+        return Response(
+            content=json.dumps({
+                "message": "this model does not exists in the server"
+            }),
+            status_code=404,
+            headers={"content-type": "application/json"}
+        )
     data = await request.json()
-    print(data)
     for key, value in data.items():
         data[key] = [np.array([value], dtype=np.float32)]
 
