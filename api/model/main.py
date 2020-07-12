@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -28,18 +27,44 @@ from models import MODELS
 model_api = APIRouter()
 
 
+def model_existence_checker(model_name) -> bool:
+    if model_name not in os.listdir("models"):
+        return False
+    return True
+
+
 @model_api.get("/")
 async def model_list() -> Response:
     return Response(
         content=json.dumps({"models": list(MODELS.keys())}),
-        status_code=200,
+        headers={"content-type": "application/json"},
+    )
+
+
+@model_api.get("/all_metadata")
+async def all_models_metadata(model_name: str) -> Response:
+    exp_data = []
+    for model_name in os.listdir("models"):
+        exp_data.append(
+            {
+                "name": MODELS[model_name]["name"],
+                "metadata": MODELS[model_name]["metadata"],
+            }
+        )
+
+    return Response(
+        content=json.dumps(
+            {
+                exp_data
+            }
+        ),
         headers={"content-type": "application/json"},
     )
 
 
 @model_api.get("/{model_name}/metadata")
 async def model_metadata(model_name: str) -> Response:
-    if model_name not in os.listdir("models"):
+    if not model_existence_checker(model_name):
         return Response(
             content=json.dumps({
                 "message": "this model does not exists in the server"
@@ -47,6 +72,7 @@ async def model_metadata(model_name: str) -> Response:
             status_code=404,
             headers={"content-type": "application/json"}
         )
+
     return Response(
         content=json.dumps(
             {
@@ -54,14 +80,13 @@ async def model_metadata(model_name: str) -> Response:
                 "metadata": MODELS[model_name]["metadata"],
             }
         ),
-        status_code=200,
         headers={"content-type": "application/json"},
     )
 
 
 @model_api.post("/{model_name}/predict")
 async def predict(model_name: str, request: Request) -> Response:
-    if model_name not in os.listdir("models"):
+    if not model_existence_checker(model_name):
         return Response(
             content=json.dumps({
                 "message": "this model does not exists in the server"
@@ -69,6 +94,7 @@ async def predict(model_name: str, request: Request) -> Response:
             status_code=404,
             headers={"content-type": "application/json"}
         )
+
     data = await request.json()
     for key, value in data.items():
         data[key] = [np.array([value], dtype=np.float32)]
@@ -83,6 +109,5 @@ async def predict(model_name: str, request: Request) -> Response:
                 "prediction": list(run[1].astype(float))[0],
             }
         ),
-        status_code=200,
         headers={"content-type": "application/json"},
     )

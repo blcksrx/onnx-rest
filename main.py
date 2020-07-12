@@ -32,7 +32,6 @@ app.include_router(router)
 def load_models() -> None:
     for file in os.listdir("models"):
         if file.endswith(".onnx"):
-            print(file)
             model = InferenceSession("models/" + file)
             metadata = {
                 "input": [
