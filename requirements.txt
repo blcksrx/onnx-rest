@@ -10,6 +10,6 @@ pydantic==1.5.1
 six==1.15.0
 starlette==0.13.4
 typing-extensions==3.7.4.2
-uvicorn==0.11.5
+uvicorn==0.11.7
 uvloop==0.14.0
 websockets==8.1
