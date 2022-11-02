@@ -16,7 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-FROM python:3.8-slim
+FROM python:3.11-slim
 MAINTAINER Hossein Torabi <blcksrx@gmail.com>
 
 COPY ./ /onnx-rest
